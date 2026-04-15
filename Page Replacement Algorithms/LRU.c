@@ -1,86 +1,104 @@
-#include<stdio.h>
+#include <stdio.h>
 
-int i,j,nof,nor,flag=0,ref[50],frm[50],pf=0,victim=-1;
-int recent[10],lrucal[50],count=0;
-
-int lruvictim();
-
-void main()
+int main()
 {
-    printf("\n\t\t\t LRU PAGE REPLACEMENT ALGORITHM");
+    int pages[50], frames[10], time[10];
+    int n, f, i, j;
+    int hit, count = 0, pos, min;
+    int page_faults = 0;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
+
+    printf("Enter page reference string:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
     
-    printf("\n Enter no.of Frames: ");
-    scanf("%d",&nof);
-
-    printf(" Enter no.of reference string: ");
-    scanf("%d",&nor);
-
-    printf("\n Enter reference string: ");
-    for(i=0;i<nor;i++)
-        scanf("%d",&ref[i]);
-
-    printf("\n\n\t\t LRU PAGE REPLACEMENT ALGORITHM\n");
-
-    for(i=0;i<nof;i++)
-        frm[i] = -1;
-
-    for(i=0;i<nor;i++)
+    for(i = 0; i < f; i++)
     {
-        flag = 0;
+        frames[i] = -1;
+        time[i] = 0;
+    }
 
-        for(j=0;j<nof;j++)
+    printf("\nPage\tFrames\t\tStatus\n");
+
+    for(i = 0; i < n; i++)
+    {
+        hit = 0;
+
+        
+        for(j = 0; j < f; j++)
         {
-            if(frm[j] == ref[i])
+            if(frames[j] == pages[i])
             {
-                flag = 1;
-                recent[j] = count++;
+                hit = 1;
+                time[j] = count++;
                 break;
             }
         }
 
-        if(flag == 0)
+        if(hit == 0)
         {
-            pf++;
+            page_faults++;
 
-            if(i < nof)
+            pos = -1;
+            for(j = 0; j < f; j++)
             {
-                frm[i] = ref[i];
-                recent[i] = count++;
+                if(frames[j] == -1)
+                {
+                    pos = j;
+                    break;
+                }
+            }
+
+            if(pos != -1)
+            {
+                frames[pos] = pages[i];
+                time[pos] = count++;
             }
             else
             {
-                victim = lruvictim();
-                frm[victim] = ref[i];
-                recent[victim] = count++;
+                
+                min = time[0];
+                pos = 0;
+
+                for(j = 1; j < f; j++)
+                {
+                    if(time[j] < min)
+                    {
+                        min = time[j];
+                        pos = j;
+                    }
+                }
+
+                frames[pos] = pages[i];
+                time[pos] = count++;
             }
         }
+
+        printf("%d\t", pages[i]);
+
+        for(j = 0; j < f; j++)
+        {
+            if(frames[j] == -1)
+                printf("- ");
+            else
+                printf("%d ", frames[j]);
+        }
+
+        if(hit)
+            printf("\tHIT");
+        else
+            printf("\tFAULT");
 
         printf("\n");
-        for(j=0;j<nof;j++)
-        {
-            if(frm[j] == -1)
-                printf("-\t");
-            else
-                printf("%d\t",frm[j]);
-        }
     }
 
-    printf("\n\n Page Faults = %d",pf);
-}
+    printf("\nTotal Page Faults = %d\n", page_faults);
+    printf("Total Hits = %d\n", n - page_faults);
 
-int lruvictim()
-{
-    int min,i,pos=0;
-    min = recent[0];
-
-    for(i=1;i<nof;i++)
-    {
-        if(recent[i] < min)
-        {
-            min = recent[i];
-            pos = i;
-        }
-    }
-
-    return pos;
+    return 0;
 }
