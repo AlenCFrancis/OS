@@ -1,108 +1,108 @@
-#include<stdio.h>
+#include <stdio.h>
 
 int main()
 {
-    int total_frames,total_pages,hit = 0;
-    int pages[25],frame[10],arr[25],time[25];
-    int m, n, page, flag, k, minimum_time, temp;
+    int pages[50], frames[10], freq[10];
+    int n, f, i, j, k;
+    int hit = 0, found, pos, min;
 
-    printf("Enter Total Number of Pages:\t");
-    scanf("%d",&total_pages);
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
 
-    printf("Enter Total Number of Frames:\t");
-    scanf("%d",&total_frames);
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
 
-    for(m = 0;m<total_frames;m++)
+    printf("Enter page reference string:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
+
+    // Initialize
+    for(i = 0; i < f; i++)
     {
-        frame[m] = -1;
+        frames[i] = -1;
+        freq[i] = 0;
     }
 
-    for(m=0;m<25;m++)
-    {
-        arr[m] = 0;
-        time[m] = 0;
-    }
+    printf("\nPage\tFrames\t\tStatus\n");
 
-    printf("Enter Values of Reference String\n");
-    for(m=0;m<total_pages;m++)
+    // Process pages
+    for(i = 0; i < n; i++)
     {
-        scanf("%d",&pages[m]);
-    }
+        found = 0;
 
-    for(m=0;m<total_pages;m++)
-    {
-        flag = 0;
-        page = pages[m];
-
-        for(n=0;n<total_frames;n++)
+        // Check HIT
+        for(j = 0; j < f; j++)
         {
-            if(frame[n] == page)
+            if(frames[j] == pages[i])
             {
-                flag = 1;
                 hit++;
-                arr[n]++;
-                time[n] = m;
+                freq[j]++;   // increase frequency
+                found = 1;
                 break;
             }
         }
 
-        if(flag == 0)
+        // PAGE FAULT
+        if(found == 0)
         {
-            int pos = -1;
-
-            for(n=0;n<total_frames;n++)
+            // Check empty frame first
+            pos = -1;
+            for(j = 0; j < f; j++)
             {
-                if(frame[n] == -1)
+                if(frames[j] == -1)
                 {
-                    pos = n;
+                    pos = j;
                     break;
                 }
             }
 
+            // If empty frame exists
             if(pos != -1)
             {
-                frame[pos] = page;
-                arr[pos] = 1;
-                time[pos] = m;
+                frames[pos] = pages[i];
+                freq[pos] = 1;
             }
             else
             {
-                int min = arr[0];
+                // Find least frequency
+                min = freq[0];
                 pos = 0;
 
-                for(n=1;n<total_frames;n++)
+                for(j = 1; j < f; j++)
                 {
-                    if(arr[n] < min)
+                    if(freq[j] < min)
                     {
-                        min = arr[n];
-                        pos = n;
-                    }
-                    else if(arr[n] == min)
-                    {
-                        if(time[n] < time[pos])
-                            pos = n;
+                        min = freq[j];
+                        pos = j;
                     }
                 }
 
-                frame[pos] = page;
-                arr[pos] = 1;
-                time[pos] = m;
+                // Replace
+                frames[pos] = pages[i];
+                freq[pos] = 1;
             }
         }
 
-        printf("\n");
-
-        for(k=0;k<total_frames;k++)
+        // Print frames
+        printf("%d\t", pages[i]);
+        for(k = 0; k < f; k++)
         {
-            if(frame[k] == -1)
-                printf("-\t");
+            if(frames[k] == -1)
+                printf("- ");
             else
-                printf("%d\t",frame[k]);
+                printf("%d ", frames[k]);
         }
+
+        if(found)
+            printf("\tHIT");
+        else
+            printf("\tFAULT");
+
+        printf("\n");
     }
 
-    printf("\nTotal Hits:\t%d",hit);
-    printf("\nTotal Page Faults:\t%d",total_pages-hit);
+    printf("\nTotal Hits = %d", hit);
+    printf("\nTotal Page Faults = %d\n", n - hit);
 
     return 0;
 }
